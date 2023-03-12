@@ -61,10 +61,12 @@ async def add_group(data: AddGroupModel):
     texts = data.texts
     logging.info(f"Adding group {group_id}")
     try:
-        tmp_nn = copy.deepcopy(NN)
-        tmp_nn.group_id = group_id
-        tmp_nn.tune(texts)
-        return ResponseModel(result="OK")
+        if not os.path.exists(f"{WEIGHTS_DIR}/{group_id}-trained.pt"):
+            tmp_nn = copy.deepcopy(NN)
+            tmp_nn.group_id = group_id
+            tmp_nn.tune(texts)
+            return ResponseModel(result="OK")
+        return ResponseModel(result="NO")
     except:
         return ResponseModel(result="ERROR")
 
@@ -75,10 +77,12 @@ async def generate(data: GenerateModel):
     hint = data.hint
     logging.info(f"Generating content for group {group_id}")
     try:
-        tmp_nn = copy.deepcopy(NN)
-        tmp_nn.load_weights(group_id)
-        result = tmp_nn.generate(hint)
-        return ResponseModel(result=result)
+        if os.path.exists(f"{WEIGHTS_DIR}/{group_id}-trained.pt"):
+            tmp_nn = copy.deepcopy(NN)
+            tmp_nn.load_weights(group_id)
+            result = tmp_nn.generate(hint)
+            return ResponseModel(result=result)
+        return ResponseModel(result="NO")
     except:
         return ResponseModel(result="ERROR")
 
