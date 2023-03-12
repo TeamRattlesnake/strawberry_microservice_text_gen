@@ -2,6 +2,7 @@ import os
 import copy
 import logging
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from fastapi.openapi.utils import get_openapi
 from models import ResponseModel, AddGroupModel, GenerateModel
 from logic import NeuralNetwork
@@ -10,12 +11,15 @@ from logic import NeuralNetwork
 logging.basicConfig(format="%(asctime)s %(message)s",
                     datefmt="%I:%M:%S %p", level=logging.INFO)
 
-app = FastAPI()
-
-NN = None
-
 WEIGHTS_DIR = "weights"
 TRAIN_TEST_DATASETS_DIR = "train_test_datasets"
+CONTENT_DIR = "content"
+
+app = FastAPI()
+
+app.mount("/content", StaticFiles(directory="content"), name="content")
+
+NN = None
 
 DESCRIPTION = """
 Микросервис для Strawberry
@@ -61,7 +65,7 @@ async def add_group(data: AddGroupModel):
     texts = data.texts
     logging.info(f"Adding group {group_id}")
     try:
-        if not os.path.exists(f"{WEIGHTS_DIR}/{group_id}-trained.pt"):
+        if (not os.path.exists(f"{WEIGHTS_DIR}/{group_id}-trained.pt")) or (not os.path.exists(f"{WEIGHTS_DIR}/{group_id}.pt")):
             tmp_nn = copy.deepcopy(NN)
             tmp_nn.group_id = group_id
             tmp_nn.tune(texts)
