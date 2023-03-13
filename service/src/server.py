@@ -67,6 +67,8 @@ async def add_group(data: AddGroupModel):
     texts = data.texts
     logging.info(f"Adding group {group_id}")
     try:
+        if len(texts) == 0:
+            raise ValueError("Empty texts")
         if (not os.path.exists(f"{WEIGHTS_DIR}/{group_id}-trained.pt")) and (not os.path.exists(f"{WEIGHTS_DIR}/{group_id}.pt")):
             f = open(f"{WEIGHTS_DIR}/{group_id}.pt", 'x')
             f.close()
@@ -80,7 +82,7 @@ async def add_group(data: AddGroupModel):
             return ResponseModel(result="OK")
         return ResponseModel(result="NO")
     except Exception as e:
-        print(e)
+        logging.error(e)
         return ResponseModel(result="ERROR")
 
 
@@ -99,7 +101,8 @@ async def generate(data: GenerateModel):
                 del process_pool[group_id]
             return ResponseModel(result=result)
         return ResponseModel(result="NO")
-    except:
+    except Exception as e:
+        logging.error(e)
         return ResponseModel(result="ERROR")
 
 
@@ -110,5 +113,6 @@ async def check_status(group_id: int):
         if os.path.exists(f"{WEIGHTS_DIR}/{group_id}-trained.pt"):
             return ResponseModel(result="OK")
         return ResponseModel(result="NO")
-    except:
+    except Exception as e:
+        logging.error(e)
         return ResponseModel(result="ERROR")
