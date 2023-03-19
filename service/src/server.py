@@ -1,6 +1,7 @@
 import os
 import copy
 import logging
+from multiprocessing import Process
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.openapi.utils import get_openapi
@@ -20,6 +21,7 @@ app = FastAPI()
 app.mount("/content", StaticFiles(directory="content"), name="content")
 
 NN = None
+process_pool = {}
 
 DESCRIPTION = """
 Микросервис для Strawberry
@@ -65,13 +67,22 @@ async def add_group(data: AddGroupModel):
     texts = data.texts
     logging.info(f"Adding group {group_id}")
     try:
-        if (not os.path.exists(f"{WEIGHTS_DIR}/{group_id}-trained.pt")) or (not os.path.exists(f"{WEIGHTS_DIR}/{group_id}.pt")):
+        if len(texts) == 0:
+            raise ValueError("Empty texts")
+        if (not os.path.exists(f"{WEIGHTS_DIR}/{group_id}-trained.pt")) and (not os.path.exists(f"{WEIGHTS_DIR}/{group_id}.pt")):
+            f = open(f"{WEIGHTS_DIR}/{group_id}.pt", 'x')
+            f.close()
             tmp_nn = copy.deepcopy(NN)
             tmp_nn.group_id = group_id
-            tmp_nn.tune(texts)
+            global process_pool
+            p = Process(target=tmp_nn.tune, args=(texts,))
+            p.start()
+            process_pool[group_id] = p
+            # tmp_nn.tune(texts)
             return ResponseModel(result="OK")
         return ResponseModel(result="NO")
-    except:
+    except Exception as e:
+        logging.error(e)
         return ResponseModel(result="ERROR")
 
 
@@ -85,9 +96,13 @@ async def generate(data: GenerateModel):
             tmp_nn = copy.deepcopy(NN)
             tmp_nn.load_weights(group_id)
             result = tmp_nn.generate(hint)
+            if process_pool.get(group_id):
+                (process_pool[group_id]).join()
+                del process_pool[group_id]
             return ResponseModel(result=result)
         return ResponseModel(result="NO")
-    except:
+    except Exception as e:
+        logging.error(e)
         return ResponseModel(result="ERROR")
 
 
@@ -98,5 +113,6 @@ async def check_status(group_id: int):
         if os.path.exists(f"{WEIGHTS_DIR}/{group_id}-trained.pt"):
             return ResponseModel(result="OK")
         return ResponseModel(result="NO")
-    except:
+    except Exception as e:
+        logging.error(e)
         return ResponseModel(result="ERROR")

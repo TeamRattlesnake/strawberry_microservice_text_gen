@@ -1,7 +1,7 @@
-requests
 fastapi
-autopep8
-SQLAlchemy
-PyMySQL
 uvicorn
 fastapi_utils
+tqdm
+transformers
+accelerate
+pydantic

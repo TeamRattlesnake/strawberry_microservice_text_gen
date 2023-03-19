@@ -10,4 +10,4 @@ services:
     volumes:
       - ./service:/home
     ports:
-      - 20000:20000
+      - 20001:20001
