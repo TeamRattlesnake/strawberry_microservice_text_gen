@@ -3,7 +3,7 @@ import re
 
 from tqdm import tqdm
 import logging
-
+import time
 import torch
 from transformers import TextDataset, DataCollatorForLanguageModeling
 from torch.utils.data import DataLoader
@@ -116,9 +116,10 @@ class NeuralNetwork:
                         outputs = self.model(**batch)
                         cum_loss += float(outputs.loss.item())
                 logging.info(str(cum_loss / len(test_loader)))
-                f.write(f"All is ok. {cum_loss / len(test_loader)}")
+                f.write(f"All is ok. {cum_loss / len(test_loader)}. Time: {time.asctime()}")
         except Exception as e:
             logging.error(f"An error occured: {e}")
+            f.write(f"Error: {e}. Time: {time.asctime()}")
         finally:
             f.close()
         os.rename(save_checkpoint_path, checkpoint_path + str(self.group_id) + "-trained.pt")
