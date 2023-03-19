@@ -1,4 +1,4 @@
 service/src/__pycache__
 venv/
 .idea/
-
+service/config.json
