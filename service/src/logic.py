@@ -81,7 +81,7 @@ class NeuralNetwork:
         lr_scheduler = get_scheduler(
             "linear",
             optimizer=optimizer,
-            num_warmup_steps=100,
+            num_warmup_steps=30,
             num_training_steps=num_training_steps
         )
 
@@ -89,10 +89,11 @@ class NeuralNetwork:
         train_dl, test_dl, self.model, optimizer = accelerator.prepare(
             train_loader, test_loader, self.model, optimizer
         )
-
+        logging.info(f"len of all texts: {len(texts)}")
         progress_bar = tqdm(range(num_training_steps))
         logging.info("start tuning")
-        with open(f"logs/logs-{self.group_id}.txt", "w") as f:
+        f = open(f"logs/logs-{self.group_id}.txt", "w")
+        try:
             for epoch in range(num_epochs):
                 self.model.train()
                 for batch in train_dl:
@@ -116,6 +117,10 @@ class NeuralNetwork:
                         cum_loss += float(outputs.loss.item())
                 logging.info(str(cum_loss / len(test_loader)))
                 f.write(f"All is ok. {cum_loss / len(test_loader)}")
+        except Exception as e:
+            logging.error(f"An error occured: {e}")
+        finally:
+            f.close()
         os.rename(save_checkpoint_path, checkpoint_path + str(self.group_id) + "-trained.pt")
 
     def load_weights(self, group_id, checkpoint_path="weights/"):
@@ -125,6 +130,7 @@ class NeuralNetwork:
         print("weights loaded")
 
     def generate(self, hint):
+        logging.info("generating")
         text = "<|startoftext|>" + hint
         input_ids = self.tokenizer.encode(text, return_tensors="pt").to(self.DEVICE)
         self.model.eval()
