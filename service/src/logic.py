@@ -2,6 +2,7 @@ import os
 import re
 
 from tqdm import tqdm
+import logging
 
 import torch
 from transformers import TextDataset, DataCollatorForLanguageModeling
@@ -11,7 +12,8 @@ from accelerate import Accelerator
 from transformers import AdamW, AutoModelForSequenceClassification, get_scheduler
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-
+logging.basicConfig(format="%(asctime)s %(message)s",
+                    datefmt="%I:%M:%S %p", level=logging.INFO)
 class NeuralNetwork:
     def __init__(self, group_id=0):
         self.DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -89,29 +91,31 @@ class NeuralNetwork:
         )
 
         progress_bar = tqdm(range(num_training_steps))
-
-        for epoch in range(num_epochs):
-            self.model.train()
-            for batch in train_dl:
-                optimizer.zero_grad()
-                outputs = self.model(**batch)
-                loss = outputs.loss
-                accelerator.backward(loss)
-                optimizer.step()
-                lr_scheduler.step()
-                progress_bar.update(1)
-
-            torch.save({
-                'model_state_dict': self.model.state_dict(),
-            }, save_checkpoint_path)
-
-            cum_loss = 0
-            self.model.eval()
-            with torch.inference_mode():
-                for batch in test_dl:
+        logging.info("start tuning")
+        with open(f"logs/logs-{self.group_id}.txt", "w") as f:
+            for epoch in range(num_epochs):
+                self.model.train()
+                for batch in train_dl:
+                    optimizer.zero_grad()
                     outputs = self.model(**batch)
-                    cum_loss += float(outputs.loss.item())
-            print(cum_loss / len(test_loader))
+                    loss = outputs.loss
+                    accelerator.backward(loss)
+                    optimizer.step()
+                    lr_scheduler.step()
+                    progress_bar.update(1)
+
+                torch.save({
+                    'model_state_dict': self.model.state_dict(),
+                }, save_checkpoint_path)
+
+                cum_loss = 0
+                self.model.eval()
+                with torch.inference_mode():
+                    for batch in test_dl:
+                        outputs = self.model(**batch)
+                        cum_loss += float(outputs.loss.item())
+                logging.info(str(cum_loss / len(test_loader)))
+                f.write(f"All is ok. {cum_loss / len(test_loader)}")
         os.rename(save_checkpoint_path, checkpoint_path + str(self.group_id) + "-trained.pt")
 
     def load_weights(self, group_id, checkpoint_path="weights/"):
