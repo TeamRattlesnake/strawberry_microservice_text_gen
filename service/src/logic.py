@@ -1,7 +1,9 @@
 import os
 import re
+import json
 
-from tqdm import tqdm
+from tqdm.contrib.telegram import tqdm, trange
+
 import logging
 import time
 import torch
@@ -101,8 +103,15 @@ class NeuralNetwork:
             train_loader, test_loader, self.model, optimizer
         )
         logging.info(f"Length of all texts: {len(texts)}")
-        progress_bar = tqdm(range(num_training_steps))
-        logging.info(f"Start tuning from train dataset: {train_dataset_path}")
+
+        with open("/home/config.json", "r", encoding="UTF-8") as f:
+            data = json.load(f)
+            token = data["tg_token"]
+            chat_id = data["tg_chat_id"]
+
+        progress_bar = tqdm(range(num_training_steps), token=token, chat_id=chat_id)
+        logging.info(
+            f"Start tuning from train dataset: {train_dataset_path}")
         try:
             for epoch in range(num_epochs):
                 logging.info(f"Epoch start for: {train_dataset_path}")
@@ -122,7 +131,8 @@ class NeuralNetwork:
                     'model_state_dict': self.model.state_dict(),
                 }, save_checkpoint_path)
 
-                logging.info(f"Starting inference for: {train_dataset_path}")
+                logging.info(
+                    f"Starting inference for: {train_dataset_path}")
                 cum_loss = 0
                 self.model.eval()
                 with torch.inference_mode():
