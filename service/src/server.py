@@ -34,7 +34,7 @@ def custom_openapi():
         return app.openapi_schema
     openapi_schema = get_openapi(
         title="Strawberry Microservice",
-        version="0.0.5",
+        version="0.1.0",
         description=DESCRIPTION,
         routes=app.routes,
     )

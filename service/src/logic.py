@@ -60,13 +60,13 @@ class NeuralNetwork:
         self.train_dataset = TextDataset(
             tokenizer=self.tokenizer,
             file_path=train_path,
-            block_size=32
+            block_size=64
         )
 
         self.test_dataset = TextDataset(
             tokenizer=self.tokenizer,
             file_path=test_path,
-            block_size=32
+            block_size=64
         )
 
         self.data_collator = DataCollatorForLanguageModeling(
@@ -115,7 +115,7 @@ class NeuralNetwork:
                                           output_dir="weights/",
                                           logging_first_step=True,
                                           logging_steps=1,
-                                          num_train_epochs=3,
+                                          num_train_epochs=20,
                                           per_device_train_batch_size=32,
                                           per_device_eval_batch_size=32,
                                           warmup_steps=10,
@@ -133,7 +133,7 @@ class NeuralNetwork:
             f"Start tuning from train dataset: {train_dataset_path}")
         try:
             trainer.train()
-            logging.info("trainer_trained")
+            logging.info(f"trainer_trained {trainer.args.num_train_epochs} epochs")
             if os.path.isfile(save_checkpoint_path):
                 os.remove(save_checkpoint_path)
             trainer.save_model(output_dir=checkpoint_path + str(self.group_id))
@@ -187,11 +187,9 @@ class NeuralNetwork:
     def load_weights(self, group_id, checkpoint_path="weights/"):
         logging.info(f"Loading weights: {checkpoint_path}")
         checkpoint_path = checkpoint_path + str(group_id) + "-trained.pt"
-        logging.info("checkpoint_path = checkpoint_path + str(group_id)")
         checkpoint = torch.load(checkpoint_path, map_location=self.DEVICE)
-        logging.info("torch.load(checkpoint_path, map_location=self.DEVICE)")
         self.model.load_state_dict(checkpoint['model_state_dict'])
-        logging.info(f"self.model.load_state_dict(checkpoint")
+        logging.info("weights loaded")
 
     def generate(self, hint):
         logging.info(f"Generating with hint: {hint}")
@@ -202,7 +200,7 @@ class NeuralNetwork:
         with torch.no_grad():
             out = self.model.generate(input_ids,
                                       do_sample=True,
-                                      temperature=1.5,
+                                      temperature=1.9,
                                       top_k=50,
                                       top_p=0.9,
                                       max_length=150,
@@ -213,5 +211,5 @@ class NeuralNetwork:
         generated_text = list(map(self.tokenizer.decode, out))[0]
         generated_text = generated_text.replace("<|startoftext|>", "")
         generated_text = generated_text.split("</s>")[0].strip()
-        logging.info(f"Generation for hint is over: {hint}")
+        logging.info(f"Generation for hint is over: {generated_text}")
         return generated_text
