@@ -10,7 +10,7 @@ from logic import NeuralNetwork
 
 
 logging.basicConfig(format="%(asctime)s %(message)s", handlers=[logging.FileHandler(
-    "/home/logs/log.txt", mode="a")], datefmt="%I:%M:%S %p", level=logging.INFO)
+    "logs/log.txt", mode="a")], datefmt="%I:%M:%S %p", level=logging.INFO)
 
 WEIGHTS_DIR = "weights"
 TRAIN_TEST_DATASETS_DIR = "train_test_datasets"
@@ -34,7 +34,7 @@ def custom_openapi():
         return app.openapi_schema
     openapi_schema = get_openapi(
         title="Strawberry Microservice",
-        version="0.0.5",
+        version="0.1.0",
         description=DESCRIPTION,
         routes=app.routes,
     )
@@ -74,11 +74,11 @@ async def add_group(data: AddGroupModel):
             f.close()
             tmp_nn = copy.deepcopy(NN)
             tmp_nn.group_id = group_id
-            global process_pool
-            p = Process(target=tmp_nn.tune, args=(texts,))
-            p.start()
-            process_pool[group_id] = p
-            # tmp_nn.tune(texts)
+            # global process_pool
+            # p = Process(target=tmp_nn.tune, args=(texts,))
+            # p.start()
+            # process_pool[group_id] = p
+            tmp_nn.tune(texts)
             return ResponseModel(result="OK")
         return ResponseModel(result="NO")
     except Exception as e:
@@ -100,6 +100,7 @@ async def generate(data: GenerateModel):
                 (process_pool[group_id]).join()
                 del process_pool[group_id]
             return ResponseModel(result=result)
+        logging.info(f"No file: {WEIGHTS_DIR}/{group_id}-trained.pt")
         return ResponseModel(result="NO")
     except Exception as e:
         logging.error(e)
