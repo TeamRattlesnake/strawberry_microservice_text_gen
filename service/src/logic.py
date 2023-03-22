@@ -17,7 +17,7 @@ from transformers import Trainer, TrainingArguments
 
 
 logging.basicConfig(format="%(asctime)s %(message)s", handlers=[logging.FileHandler(
-    "logs/log.txt", mode="a")], datefmt="%I:%M:%S %p", level=logging.INFO)
+    "/home/logs/log.txt", mode="w", encoding="UTF-8")], datefmt="%I:%M:%S %p", level=logging.INFO)
 
 
 class NeuralNetwork:
@@ -115,7 +115,7 @@ class NeuralNetwork:
                                           output_dir="weights/",
                                           logging_first_step=True,
                                           logging_steps=1,
-                                          num_train_epochs=20,
+                                          num_train_epochs=15,
                                           per_device_train_batch_size=32,
                                           per_device_eval_batch_size=32,
                                           warmup_steps=10,
@@ -133,7 +133,8 @@ class NeuralNetwork:
             f"Start tuning from train dataset: {train_dataset_path}")
         try:
             trainer.train()
-            logging.info(f"trainer_trained {trainer.args.num_train_epochs} epochs")
+            logging.info(
+                f"trainer_trained {trainer.args.num_train_epochs} epochs")
             if os.path.isfile(save_checkpoint_path):
                 os.remove(save_checkpoint_path)
             trainer.save_model(output_dir=checkpoint_path + str(self.group_id))
