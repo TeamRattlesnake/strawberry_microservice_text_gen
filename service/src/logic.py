@@ -1,4 +1,5 @@
 import os
+import datetime
 import re
 import json
 
@@ -17,13 +18,14 @@ from transformers import Trainer, TrainingArguments
 
 
 logging.basicConfig(format="%(asctime)s %(message)s", handlers=[logging.FileHandler(
-    "/home/logs/log.txt", mode="w", encoding="UTF-8")], datefmt="%I:%M:%S %p", level=logging.INFO)
+    f"/home/logs/log-{datetime.datetime.now()}.txt", mode="w", encoding="UTF-8")], datefmt="%I:%M:%S %p", level=logging.INFO)
 
 
 class NeuralNetwork:
     def __init__(self, group_id=0):
-        self.DEVICE = torch.device(
-            'cuda' if torch.cuda.is_available() else 'cpu')
+        device_string = 'cuda' if torch.cuda.is_available() else 'cpu'
+        logging.info(f"Torch uses: {device_string}")
+        self.DEVICE = torch.device(device_string)
         checkpoint = "Kirili4ik/ruDialoGpt3-medium-finetuned-telegram"
         self.tokenizer = AutoTokenizer.from_pretrained(checkpoint)
         self.model = AutoModelForCausalLM.from_pretrained(checkpoint)

@@ -4,7 +4,7 @@ WORKDIR /home
 
 COPY . /home
 
-RUN dnf install -y pip && \
+RUN dnf install -y pip xorg-x11-drv-nvidia xorg-x11-drv-nvidia-cuda && \
     pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu && \
     pip install -r requirements.txt
 
