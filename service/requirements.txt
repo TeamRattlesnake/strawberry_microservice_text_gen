@@ -1,4 +1,6 @@
 torch
+torchvision
+torchaudio
 fastapi
 uvicorn
 fastapi_utils
