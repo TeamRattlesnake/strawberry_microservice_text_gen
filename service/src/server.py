@@ -10,7 +10,7 @@ from logic import NeuralNetwork
 
 
 logging.basicConfig(format="%(asctime)s %(message)s", handlers=[logging.FileHandler(
-    "logs/log.txt", mode="a")], datefmt="%I:%M:%S %p", level=logging.INFO)
+    f"/home/logs/log-{datetime.datetime.now()}.txt", mode="a", encoding="UTF-8")], datefmt="%I:%M:%S %p", level=logging.INFO)
 
 WEIGHTS_DIR = "weights"
 TRAIN_TEST_DATASETS_DIR = "train_test_datasets"
