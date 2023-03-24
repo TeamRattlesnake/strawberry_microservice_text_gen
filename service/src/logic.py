@@ -1,5 +1,5 @@
 import os
-import datetime
+import time
 import re
 import json
 
@@ -18,7 +18,7 @@ from transformers import Trainer, TrainingArguments
 
 
 logging.basicConfig(format="%(asctime)s %(message)s", handlers=[logging.FileHandler(
-    f"/home/logs/text_gen_{datetime.datetime.now()}.txt", mode="a", encoding="UTF-8")], datefmt="%I:%M:%S %p", level=logging.INFO)
+    f"/home/logs/text_gen_{time.ctime()}.txt", mode="a", encoding="UTF-8")], datefmt="%I:%M:%S %p", level=logging.INFO)
 
 
 class NeuralNetwork:

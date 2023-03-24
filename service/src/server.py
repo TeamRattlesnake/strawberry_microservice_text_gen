@@ -1,6 +1,7 @@
 import os
 import datetime
 import copy
+import time
 import logging
 from multiprocessing import Process
 from fastapi import FastAPI
@@ -11,7 +12,7 @@ from logic import NeuralNetwork
 
 
 logging.basicConfig(format="%(asctime)s %(message)s", handlers=[logging.FileHandler(
-    f"/home/logs/text_gen_{datetime.datetime.now()}.txt", mode="a", encoding="UTF-8")], datefmt="%I:%M:%S %p", level=logging.INFO)
+    f"/home/logs/text_gen_{time.ctime()}.txt", mode="a", encoding="UTF-8")], datefmt="%I:%M:%S %p", level=logging.INFO)
 
 WEIGHTS_DIR = "weights"
 TRAIN_TEST_DATASETS_DIR = "train_test_datasets"
