@@ -23,9 +23,9 @@ logging.basicConfig(format="%(asctime)s %(message)s", handlers=[logging.FileHand
 
 class NeuralNetwork:
     def __init__(self, group_id=0):
-        device_string = 'cuda' if torch.cuda.is_available() else 'cpu'
-        logging.info(f"Torch uses: {device_string}")
-        self.DEVICE = torch.device(device_string)
+        #device_string = 'cuda' if torch.cuda.is_available() else 'cpu'
+        logging.info(f"Torch uses: cpu (поставил на время пока не придумаем решение)")
+        self.DEVICE = torch.device("cpu")
         checkpoint = "Kirili4ik/ruDialoGpt3-medium-finetuned-telegram"
         self.tokenizer = AutoTokenizer.from_pretrained(checkpoint)
         self.model = AutoModelForCausalLM.from_pretrained(checkpoint)
