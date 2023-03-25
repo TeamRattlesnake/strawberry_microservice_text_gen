@@ -1,4 +1,3 @@
-torch
 fastapi
 uvicorn
 fastapi_utils

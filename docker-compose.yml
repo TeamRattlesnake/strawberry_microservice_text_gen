@@ -11,10 +11,3 @@ services:
       - ./service:/home
     ports:
       - 20001:20001
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
