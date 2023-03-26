@@ -21,10 +21,17 @@ logging.basicConfig(format="%(asctime)s %(message)s", handlers=[logging.FileHand
     f"/home/logs/text_gen_{time.ctime()}.txt", mode="a", encoding="UTF-8")], datefmt="%I:%M:%S %p", level=logging.INFO)
 
 
+def clean_string(string):
+    permitted_chars = "^0-9A-Za-zА-Яа-яёЁ'\,:;.!?/@#()*+-\n"
+    string = re.sub(f"[{permitted_chars}]+", " ", string)
+    return string
+
+
 class NeuralNetwork:
     def __init__(self, group_id=0):
         #device_string = 'cuda' if torch.cuda.is_available() else 'cpu'
-        logging.info(f"Torch uses: cpu (поставил на время пока не придумаем решение)")
+        logging.info(
+            f"Torch uses: cpu (поставил на время пока не придумаем решение)")
         self.DEVICE = torch.device("cpu")
         checkpoint = "Kirili4ik/ruDialoGpt3-medium-finetuned-telegram"
         self.tokenizer = AutoTokenizer.from_pretrained(checkpoint)
@@ -76,6 +83,7 @@ class NeuralNetwork:
         )
 
     def tune(self, texts, checkpoint_path="weights/", train_dataset_path="train_test_datasets/train", test_dataset_path="train_test_datasets/test"):
+        texts = [clean_string(string) for string in texts]
         logging.info("Tuning")
         logging.info(f"Torch Cuda is available: {torch.cuda.is_available()}")
         train_dataset_path = train_dataset_path + str(self.group_id)
