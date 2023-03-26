@@ -22,7 +22,7 @@ logging.basicConfig(format="%(asctime)s %(message)s", handlers=[logging.FileHand
 
 
 def clean_string(string):
-    permitted_chars = "^0-9A-Za-zА-Яа-яёЁ'\,:;.!?/@#()*+-"
+    permitted_chars = "^0-9A-Za-zА-Яа-яёЁ!,:;.!?/@#()*+-"
     string = re.sub(f"[{permitted_chars}]+", " ", string)
     return string
 
