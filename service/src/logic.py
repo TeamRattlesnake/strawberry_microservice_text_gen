@@ -18,7 +18,7 @@ from transformers import Trainer, TrainingArguments
 
 
 logging.basicConfig(format="%(asctime)s %(message)s", handlers=[logging.FileHandler(
-    f"/home/logs/text_gen_{time.ctime()}.txt", mode="a", encoding="UTF-8")], datefmt="%I:%M:%S %p", level=logging.INFO)
+    f"/home/logs/log.txt", mode="a", encoding="UTF-8")], datefmt="%I:%M:%S %p", level=logging.INFO)
 
 
 def clean_string(string):
@@ -93,107 +93,6 @@ class NeuralNetwork:
         self.build_text_file(
             texts[:int(len(texts)*0.1)], dest_path=test_dataset_path)
         self.load_dataset(train_dataset_path, test_dataset_path)
-
-        train_loader = DataLoader(
-            self.train_dataset, shuffle=True, batch_size=1, collate_fn=self.data_collator)
-        test_loader = DataLoader(
-            self.test_dataset, batch_size=1, collate_fn=self.data_collator)
-
-        num_epochs = 3
-        optimizer = AdamW(self.model.parameters(), lr=3e-5)
-        save_checkpoint_path = checkpoint_path + str(self.group_id) + ".pt"
-
-        num_training_steps = num_epochs * len(self.train_dataset)
-        lr_scheduler = get_scheduler(
-            "linear",
-            optimizer=optimizer,
-            num_warmup_steps=30,
-            num_training_steps=num_training_steps
-        )
-
-        accelerator = Accelerator()
-        train_dl, test_dl, self.model, optimizer = accelerator.prepare(
-            train_loader, test_loader, self.model, optimizer
-        )
-        logging.info(f"Length of all texts: {len(texts)}")
-
-        # with open("/home/config.json", "r", encoding="UTF-8") as f:
-        #     data = json.load(f)
-        #     token = data["tg_token"]
-        #     chat_id = data["tg_chat_id"]
-        training_args = TrainingArguments(logging_dir="logs/",
-                                          output_dir="weights/",
-                                          logging_first_step=True,
-                                          logging_steps=1,
-                                          num_train_epochs=15,
-                                          per_device_train_batch_size=32,
-                                          per_device_eval_batch_size=32,
-                                          warmup_steps=10,
-                                          gradient_accumulation_steps=16,
-                                          )
-        trainer = Trainer(
-            model=self.model,
-            args=training_args,
-            train_dataset=self.train_dataset,
-            eval_dataset=self.test_dataset,
-            data_collator=self.data_collator,
-            tokenizer=self.tokenizer,
-        )
-        logging.info(
-            f"Start tuning from train dataset: {train_dataset_path}")
-        try:
-            trainer.train()
-            logging.info(
-                f"trainer_trained {trainer.args.num_train_epochs} epochs")
-            if os.path.isfile(save_checkpoint_path):
-                os.remove(save_checkpoint_path)
-            trainer.save_model(output_dir=checkpoint_path + str(self.group_id))
-            torch.save(
-                {'model_state_dict': self.model.state_dict(), },
-                checkpoint_path + str(self.group_id) + "-trained.pt"
-            )
-            # for epoch in range(num_epochs):
-            #     logging.info(f"Epoch start for: {train_dataset_path}")
-            #     self.model.train()
-            #     logging.info("Model turned to train")
-            #     for batch in train_dl:
-            #         logging.info("Batch train start")
-            #         optimizer.zero_grad()
-            #         logging.info("optimizer.zero_grad()")
-            #         outputs = self.model(**batch)
-            #         logging.info("outputs = self.model(**batch)")
-            #         loss = outputs.loss
-            #         logging.info("loss = outputs.loss")
-            #         accelerator.backward(loss)
-            #         logging.info("accelerator.backward(loss)")
-            #         optimizer.step()
-            #         logging.info("optimizer.step()")
-            #         lr_scheduler.step()
-            #         logging.info("lr_scheduler.step()")
-            #         progress_bar.update(1)
-            #         logging.info("progress_bar.update(1)")
-            #     logging.info(
-            #         f"Epoch train end, saving checkpoint: {train_dataset_path}")
-            #
-            #       torch.save({
-            #           'model_state_dict': self.model.state_dict(),
-            #       }, save_checkpoint_path)
-            #
-            #     logging.info(
-            #         f"Starting inference for: {train_dataset_path}")
-            #     cum_loss = 0
-            #     self.model.eval()
-            #     with torch.inference_mode():
-            #         for batch in test_dl:
-            #             outputs = self.model(**batch)
-            #             cum_loss += float(outputs.loss.item())
-            #     logging.info(
-            #         f"All is ok, epoch is over. {cum_loss / len(test_loader)}. Time: {time.asctime()}")
-        except Exception as e:
-            logging.error(
-                f"An error occured: {e}, dataset: {train_dataset_path}")
-        # os.rename(save_checkpoint_path, checkpoint_path +
-        #           str(self.group_id) + "-trained.pt")
 
     def load_weights(self, group_id, checkpoint_path="weights/"):
         logging.info(f"Loading weights: {checkpoint_path}")
