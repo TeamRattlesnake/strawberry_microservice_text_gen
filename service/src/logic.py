@@ -18,7 +18,7 @@ from transformers import Trainer, TrainingArguments
 
 
 logging.basicConfig(format="%(asctime)s %(message)s", handlers=[logging.FileHandler(
-    f"/home/logs/log.txt", mode="a", encoding="UTF-8")], datefmt="%I:%M:%S %p", level=logging.INFO)
+    f"/home/logs/text_gen_server_log_{time.ctime()}.txt", mode="a", encoding="UTF-8")], datefmt="%I:%M:%S %p", level=logging.INFO)
 
 
 def clean_string(string):
