@@ -12,7 +12,7 @@ from logic import NeuralNetwork
 
 
 logging.basicConfig(format="%(asctime)s %(message)s", handlers=[logging.FileHandler(
-    f"/home/logs/text_gen_{time.ctime()}.txt", mode="a", encoding="UTF-8")], datefmt="%I:%M:%S %p", level=logging.INFO)
+    f"/home/logs/log.txt", mode="a", encoding="UTF-8")], datefmt="%I:%M:%S %p", level=logging.INFO)
 
 WEIGHTS_DIR = "weights"
 TRAIN_TEST_DATASETS_DIR = "train_test_datasets"
@@ -76,11 +76,8 @@ async def add_group(data: AddGroupModel):
             f.close()
             tmp_nn = copy.deepcopy(NN)
             tmp_nn.group_id = group_id
-            # global process_pool
-            # p = Process(target=tmp_nn.tune, args=(texts,))
-            # p.start()
-            # process_pool[group_id] = p
             tmp_nn.tune(texts)
+            del tmp_nn
             return ResponseModel(result="OK")
         return ResponseModel(result="NO")
     except Exception as e:
@@ -93,20 +90,19 @@ async def generate(data: GenerateModel):
     group_id = data.group_id
     hint = data.hint
     logging.info(f"Generating content for group {group_id}")
+    tmp_nn = copy.deepcopy(NN)
     try:
         if os.path.exists(f"{WEIGHTS_DIR}/{group_id}-trained.pt"):
-            tmp_nn = copy.deepcopy(NN)
             tmp_nn.load_weights(group_id)
             result = tmp_nn.generate(hint)
-            if process_pool.get(group_id):
-                (process_pool[group_id]).join()
-                del process_pool[group_id]
             return ResponseModel(result=result)
         logging.info(f"No file: {WEIGHTS_DIR}/{group_id}-trained.pt")
         return ResponseModel(result="NO")
     except Exception as e:
         logging.error(e)
         return ResponseModel(result="ERROR")
+    finally:
+        del tmp_nn
 
 
 @app.get("/check_status", response_model=ResponseModel)
