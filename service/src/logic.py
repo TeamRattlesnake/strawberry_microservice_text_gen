@@ -204,6 +204,7 @@ class NeuralNetwork:
 
     def generate(self, hint):
         logging.info(f"Generating with hint: {hint}")
+        hint = clean_string(hint)
         text = "<|startoftext|>" + hint
         input_ids = self.tokenizer.encode(
             text, return_tensors="pt").to(self.DEVICE)
