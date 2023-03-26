@@ -20,11 +20,11 @@ from transformers import Trainer, TrainingArguments
 all_groups = set()
 order_queue = queue.PriorityQueue()
 NN = None
-epochs_list = [0, 1, 3, 5, 10, 25, 50, 100, 200]
+epochs_list = [1, 8]  # Изменил потому что у меня сервер с ума сходит от такой нагрузки. Пусть веса сохраняются после первой эпохи чтобы у пользователя была возможность как можно быстрее пользоваться сервисом и потом будет 8 эпох для нормального обучения
 
 
 logging.basicConfig(format="%(asctime)s %(message)s", handlers=[logging.FileHandler(
-    "/home/logs/model_log.txt", mode="a")], datefmt="%I:%M:%S %p", level=logging.INFO)
+    f"/home/logs/text_gen_model_log_{time.ctime()}.txt", mode="a")], datefmt="%I:%M:%S %p", level=logging.INFO)
 
 
 class NeuralNetwork:
@@ -113,7 +113,8 @@ class NeuralNetwork:
             f"Start tuning from train dataset: {train_dataset_path}")
         try:
             if epochs == 0:
-                logging.info(f"trainer_trained {trainer.args.num_train_epochs} epochs")
+                logging.info(
+                    f"trainer_trained {trainer.args.num_train_epochs} epochs")
                 if os.path.isfile(save_checkpoint_path):
                     os.remove(save_checkpoint_path)
                 trainer.save_model(output_dir=checkpoint_path + str(group_id))
@@ -121,10 +122,12 @@ class NeuralNetwork:
                     {'model_state_dict': self.model.state_dict(), },
                     checkpoint_path + str(group_id) + "-trained.pt"
                 )
-                logging.info(f"Weights saved: {checkpoint_path + str(group_id)}-trained.pt")
+                logging.info(
+                    f"Weights saved: {checkpoint_path + str(group_id)}-trained.pt")
                 return
             trainer.train()
-            logging.info(f"trainer_trained {trainer.args.num_train_epochs} epochs")
+            logging.info(
+                f"trainer_trained {trainer.args.num_train_epochs} epochs")
             if os.path.isfile(save_checkpoint_path):
                 os.remove(save_checkpoint_path)
             trainer.save_model(output_dir=checkpoint_path + str(group_id))
@@ -132,7 +135,8 @@ class NeuralNetwork:
                 {'model_state_dict': self.model.state_dict(), },
                 checkpoint_path + str(group_id) + "-trained.pt"
             )
-            logging.info(f"Weights saved: {checkpoint_path + str(group_id)}-trained.pt")
+            logging.info(
+                f"Weights saved: {checkpoint_path + str(group_id)}-trained.pt")
         except Exception as e:
             logging.error(
                 f"An error occured: {e}, dataset: {train_dataset_path}")
