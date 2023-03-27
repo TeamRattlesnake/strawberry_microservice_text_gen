@@ -1,3 +1,4 @@
+import gc
 import os
 import datetime
 import copy
@@ -74,10 +75,8 @@ async def add_group(data: AddGroupModel):
         if (not os.path.exists(f"{WEIGHTS_DIR}/{group_id}-trained.pt")) and (not os.path.exists(f"{WEIGHTS_DIR}/{group_id}.pt")):
             f = open(f"{WEIGHTS_DIR}/{group_id}.pt", 'x')
             f.close()
-            tmp_nn = copy.deepcopy(NN)
-            tmp_nn.group_id = group_id
-            tmp_nn.tune(texts)
-            del tmp_nn
+            NN.group_id = group_id
+            NN.tune(texts)
             return ResponseModel(result="OK")
         return ResponseModel(result="NO")
     except Exception as e:
@@ -103,6 +102,7 @@ async def generate(data: GenerateModel):
         return ResponseModel(result="ERROR")
     finally:
         del tmp_nn
+        gc.collect()
 
 
 @app.get("/check_status", response_model=ResponseModel)

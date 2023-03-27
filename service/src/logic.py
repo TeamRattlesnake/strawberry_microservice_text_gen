@@ -121,6 +121,6 @@ class NeuralNetwork:
                                       )
         generated_text = list(map(self.tokenizer.decode, out))[0]
         generated_text = generated_text.replace("<|startoftext|>", "")
-        generated_text = generated_text.split("</s>")[0].strip()
+        generated_text = clean_string(generated_text.split("</s>")[0].strip())
         logging.info(f"Generation for hint is over: {generated_text}")
         return generated_text

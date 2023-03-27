@@ -1,5 +1,6 @@
 import copy
 import os
+import gc
 import re
 import json
 import queue
@@ -20,7 +21,7 @@ from transformers import Trainer, TrainingArguments
 all_groups = set()
 order_queue = queue.PriorityQueue()
 NN = None
-epochs_list = [0, 1, 3, 5, 10, 25, 50, 100, 200]
+epochs_list = [0, 1, 3, 5, 10]
 
 
 logging.basicConfig(format="%(asctime)s %(message)s", handlers=[logging.FileHandler(
@@ -174,6 +175,7 @@ def main():
         tmp_nn = copy.deepcopy(NN)
         tmp_nn.tune(group_id, epochs)
         del tmp_nn
+        gc.collect()
         if epochs != epochs_list[-1]:
             next_epochs = epochs_list[epochs_list.index(epochs) + 1]
             logging.info(f"Next epochs: {next_epochs}")
