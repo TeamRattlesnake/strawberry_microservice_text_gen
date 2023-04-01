@@ -1,7 +1,0 @@
-fastapi
-uvicorn
-fastapi_utils
-tqdm
-transformers
-accelerate
-pydantic
