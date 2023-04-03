@@ -25,7 +25,7 @@ epochs_list = [0, 1, 3, 10]
 
 
 logging.basicConfig(format="%(asctime)s %(message)s", handlers=[logging.FileHandler(
-    f"/home/logs/summarize_log_model.txt", mode="a")], datefmt="%I:%M:%S %p", level=logging.INFO)
+    f"/home/logs/text_gen_log_model.txt", mode="a")], datefmt="%I:%M:%S %p", level=logging.INFO)
 
 
 class NeuralNetwork:
