@@ -1,4 +1,4 @@
-FROM adefe/strawberry_env:v2
+FROM adefe/strawberry_env:v3
 
 WORKDIR /home
 
