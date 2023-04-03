@@ -21,11 +21,11 @@ from transformers import Trainer, TrainingArguments
 all_groups = set()
 order_queue = queue.PriorityQueue()
 NN = None
-epochs_list = [0, 1, 3, 5, 10]
+epochs_list = [0, 1, 3, 10]
 
 
 logging.basicConfig(format="%(asctime)s %(message)s", handlers=[logging.FileHandler(
-    "/home/logs/model_log.txt", mode="a")], datefmt="%I:%M:%S %p", level=logging.INFO)
+    f"/home/logs/summarize_log_model.txt", mode="a")], datefmt="%I:%M:%S %p", level=logging.INFO)
 
 
 class NeuralNetwork:
