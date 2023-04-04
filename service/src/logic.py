@@ -111,10 +111,11 @@ class NeuralNetwork:
         with torch.no_grad():
             out = self.model.generate(input_ids,
                                       do_sample=True,
-                                      temperature=1.9,
+                                      temperature=2.9,
                                       top_k=50,
                                       top_p=0.9,
-                                      min_new_tokens=5,
+                                      max_length=15,
+                                      min_length=3,
                                       num_return_sequences=1,
                                       eos_token_id=self.tokenizer.eos_token_id,
                                       pad_token_id=self.tokenizer.pad_token_id,
