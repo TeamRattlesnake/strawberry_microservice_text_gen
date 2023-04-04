@@ -10,7 +10,7 @@ from tqdm import tqdm, trange
 import logging
 import time
 import torch
-from transformers import TextDataset, DataCollatorForLanguageModeling
+from transformers import TextDataset, DataCollatorForLanguageModeling, GPT2LMHeadModel, GPT2Tokenizer
 from torch.utils.data import DataLoader
 
 from accelerate import Accelerator
@@ -33,8 +33,8 @@ class NeuralNetwork:
         self.DEVICE = torch.device(
             'cuda' if torch.cuda.is_available() else 'cpu')
         checkpoint = "Kirili4ik/ruDialoGpt3-medium-finetuned-telegram"
-        self.tokenizer = AutoTokenizer.from_pretrained(checkpoint)
-        self.model = AutoModelForCausalLM.from_pretrained(checkpoint)
+        self.tokenizer = GPT2Tokenizer.from_pretrained(checkpoint)
+        self.model = GPT2LMHeadModel.from_pretrained(checkpoint)
         self.train_dataset = None
         self.test_dataset = None
         self.data_collator = None
