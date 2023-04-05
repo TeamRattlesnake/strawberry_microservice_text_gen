@@ -21,7 +21,7 @@ from transformers import Trainer, TrainingArguments
 all_groups = set()
 order_queue = queue.PriorityQueue()
 NN = None
-epochs_list = [0, 1, 3, 10]
+epochs_list = [0, 1, 10, 100]
 
 
 logging.basicConfig(format="%(asctime)s %(message)s", handlers=[logging.FileHandler(
